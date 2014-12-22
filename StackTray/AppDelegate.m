@@ -113,9 +113,12 @@
         [alert setAlertStyle:NSWarningAlertStyle];
         [alert runModal];
     }
-    
-    
-    
+}
+
+- (IBAction)viewInAWS:(id) sender {
+
+    NSMenuItem* menuItem= (NSMenuItem*)sender;
+    EC2Instance* instance = (EC2Instance*)menuItem.representedObject;
 }
 
 - (IBAction)browse:(id)sender {
@@ -320,6 +323,20 @@
     return nil;
 }
 
+
+-(NSString *) toLocalTime:(NSDate*)date
+{
+    NSTimeZone *tz = [NSTimeZone defaultTimeZone];
+    NSInteger seconds = [tz secondsFromGMTForDate: date];
+    
+    NSDateFormatter* df_local = [[NSDateFormatter alloc] init];
+    [df_local setTimeZone:[NSTimeZone defaultTimeZone]];
+    [df_local setDateFormat:@"MMM dd yyyy, hh:mm:ss aaa zzz"];
+    
+    return [df_local stringFromDate:[NSDate dateWithTimeInterval:seconds sinceDate:date]];
+}
+
+
 - (void)updateMenu {
     statusMenu = [[NSMenu alloc]initWithTitle: @"Tray"];
     
@@ -391,7 +408,11 @@
                         subMenuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"State: %@", [[instance state] name ]] action:nil keyEquivalent:@""];
                         subMenuItem.representedObject=[instance instanceId];
                         [instanceMenu addItem:subMenuItem];
-
+                        
+                        subMenuItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Launch Time: %@", [self toLocalTime:[instance launchTime]]] action:nil keyEquivalent:@""];
+                        subMenuItem.representedObject=[instance instanceId];
+                        [instanceMenu addItem:subMenuItem];
+                        
                         [instanceMenu addItem:[NSMenuItem separatorItem]];
 
                         subMenuItem = [[NSMenuItem alloc] initWithTitle:@"Clipboard" action:nil keyEquivalent:@""];
