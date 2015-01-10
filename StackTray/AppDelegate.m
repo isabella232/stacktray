@@ -348,8 +348,12 @@
     [fetchRequest setEntity:entity];
 
     NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
-    
+
+    bool useSubMenu = fetchedObjects.count > 1;
     if (fetchedObjects.count>0) {
+        
+
+        
         for (Stack *stack in fetchedObjects) {
             if (stack.accessKey==nil || [stack.accessKey isEqualToString:@""]) {
                 continue;
@@ -375,12 +379,14 @@
                 EC2DescribeInstancesRequest* rq = [EC2DescribeInstancesRequest alloc];
                 EC2DescribeInstancesResponse* response = [client describeInstances:(EC2DescribeInstancesRequest *)rq];
                 
-                NSMenu* instancesMenu = [[NSMenu alloc]initWithTitle: stack.title];
+                NSMenu* instancesMenu =  statusMenu;
+                NSMenuItem* instancesMenuItem = nil;
                 
-                NSMenuItem* instancesMenuItem = [[NSMenuItem alloc] initWithTitle:stack.title action:nil keyEquivalent:@"" ];
-                [instancesMenuItem setSubmenu:instancesMenu];
-                
-
+                if(useSubMenu) {
+                    instancesMenu = [[NSMenu alloc]initWithTitle: stack.title];
+                    instancesMenuItem = [[NSMenuItem alloc] initWithTitle:stack.title action:nil keyEquivalent:@"" ];
+                    [instancesMenuItem setSubmenu:instancesMenu];
+                }
                 
                 for (EC2Reservation* reservation in [response reservations]) {
                     
@@ -486,15 +492,17 @@
                         [instanceMenu addItem:subMenuItem];
 
                         [instanceMenuItem setSubmenu:instanceMenu];
-                        
                         [instancesMenu addItem:instanceMenuItem];
+
                     }
                 }
                 
 
                 [self sortMenu:instancesMenu];
-                
-                [statusMenu addItem:instancesMenuItem];
+            
+                if(useSubMenu) {
+                    [statusMenu addItem:instancesMenuItem];
+                }
             }
             @catch (AmazonClientException *exception) {
                 NSLog(@"%@ error", exception);
