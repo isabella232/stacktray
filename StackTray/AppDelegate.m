@@ -370,11 +370,7 @@
             
             @try {
                 AmazonEC2Client* client = [[AmazonEC2Client alloc] initWithAccessKey:stack.accessKey withSecretKey:stack.secretKey];
-                
-                
                 client.endpoint =  [@"https://" stringByAppendingString:stack.region];
-
-                NSLog(@"%@ %@ %@, %@", stack.accessKey, stack.secretKey, [@"https://" stringByAppendingString:stack.region], stack.pemFileLocation);
                 
                 EC2DescribeInstancesRequest* rq = [EC2DescribeInstancesRequest alloc];
                 EC2DescribeInstancesResponse* response = [client describeInstances:(EC2DescribeInstancesRequest *)rq];
@@ -451,9 +447,12 @@
                         NSMenuItem* instanceMenuItem = [[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@"" ];
                         
                         if ([[[instance state] name] caseInsensitiveCompare:@"running"]!=NSOrderedSame) {
-                            // [instanceMenuItem setAttributedTitle:[[NSAttributedString alloc] initWithHTML:[[NSString stringWithFormat:@"<span style='color: red;'>%@</span>", title] dataUsingEncoding:NSUTF8StringEncoding] baseURL:nil documentAttributes:nil]];
-    //                        &#9679;
+                            [instanceMenuItem setAttributedTitle:[[NSAttributedString alloc] initWithHTML:[[NSString stringWithFormat:@"<span style='color: red;'>%@</span>", title] dataUsingEncoding:NSUTF8StringEncoding] baseURL:nil documentAttributes:nil]];
                         }
+                        
+                        // [instanceMenuItem setAttributedTitle:[[NSAttributedString alloc] initWithHTML:[[NSString stringWithFormat:@"<span style='color: red;'>%@</span>", title] dataUsingEncoding:NSUTF8StringEncoding] baseURL:nil documentAttributes:nil]];
+                        //                        &#9679;
+                        
                         
                         [instanceMenu addItem:[NSMenuItem separatorItem]];
                         
@@ -541,9 +540,14 @@
     NSMenuItem* quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit StackTray" action:@selector(quit:) keyEquivalent:@"" ];
     [statusMenu addItem:quitMenuItem];
 
-    [statusItem setMenu:statusMenu];
+    [statusItem setAction:@selector(menuAction:)];
 }
 
+- (void)menuAction:(id)sender {
+    NSLog(@"Refreshing details");
+    [self refresh];
+    [statusItem popUpStatusItemMenu:statusMenu];
+}
 
 - (IBAction)quit:(id)sender {
     [[NSApplication sharedApplication] terminate:nil];
