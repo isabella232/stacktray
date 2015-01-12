@@ -326,14 +326,10 @@
 
 -(NSString *) toLocalTime:(NSDate*)date
 {
-    NSTimeZone *tz = [NSTimeZone defaultTimeZone];
-    NSInteger seconds = [tz secondsFromGMTForDate: date];
-    
     NSDateFormatter* df_local = [[NSDateFormatter alloc] init];
     [df_local setTimeZone:[NSTimeZone defaultTimeZone]];
     [df_local setDateFormat:@"MMM dd yyyy, hh:mm:ss aaa zzz"];
-    
-    return [df_local stringFromDate:[NSDate dateWithTimeInterval:seconds sinceDate:date]];
+    return [df_local stringFromDate:date];
 }
 
 
