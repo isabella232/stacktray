@@ -442,9 +442,14 @@
                         
                         NSMenuItem* instanceMenuItem = [[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@"" ];
                         
-                        if ([[[instance state] name] caseInsensitiveCompare:@"running"]!=NSOrderedSame) {
-                            [instanceMenuItem setAttributedTitle:[[NSAttributedString alloc] initWithHTML:[[NSString stringWithFormat:@"<span style='color: red;'>%@</span>", title] dataUsingEncoding:NSUTF8StringEncoding] baseURL:nil documentAttributes:nil]];
-                        }
+                        //set the font and title for menu item
+                        NSDictionary *attributes = @{
+                                 NSFontAttributeName: [NSFont fontWithName:@"Arial" size:15.0],
+                                 NSForegroundColorAttributeName: [self getInstanceStateFontColor:instance]
+                                 };
+                        NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:[instanceMenuItem title] attributes:attributes];
+                        [instanceMenuItem setAttributedTitle:attributedTitle];
+
                         
                         // [instanceMenuItem setAttributedTitle:[[NSAttributedString alloc] initWithHTML:[[NSString stringWithFormat:@"<span style='color: red;'>%@</span>", title] dataUsingEncoding:NSUTF8StringEncoding] baseURL:nil documentAttributes:nil]];
                         //                        &#9679;
@@ -537,6 +542,19 @@
     [statusMenu addItem:quitMenuItem];
 
     [statusItem setAction:@selector(menuAction:)];
+}
+
+- (NSColor *) getInstanceStateFontColor:(EC2Instance *)instance {
+    
+    if ([[[instance state] name] caseInsensitiveCompare:@"terminated"]==NSOrderedSame) {
+        return [NSColor redColor];
+    }
+    else if ([[[instance state] name] caseInsensitiveCompare:@"stopping"]==NSOrderedSame) {
+        return [NSColor orangeColor];
+    }
+    else {
+        return [NSColor blackColor];
+    }
 }
 
 - (void)menuAction:(id)sender {
